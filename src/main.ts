@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import session from 'express-session';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -31,6 +32,8 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.use(cookieParser());
 
   await app.listen(configService.getOrThrow<number>('PORT'), () =>
     console.log(configService.getOrThrow<number>('PORT')),
