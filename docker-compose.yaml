@@ -12,5 +12,15 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
 
+  redis:
+    image: redis:6
+    container_name: redis
+    restart: always
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - redis:/data
+
 volumes:
   pg_data:
+  redis:
