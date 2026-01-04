@@ -24,6 +24,19 @@ export class UserService {
     return user;
   }
 
+  async getUserById(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ['createdAt', 'email', 'id', 'role', 'username'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async create(dto: CreateUserDto) {
     const isExist = await this.userRepository.findOne({ where: { email: dto.email } });
 
