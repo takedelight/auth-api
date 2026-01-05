@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { RedisService } from 'src/redis/redis.service';
+import { Session } from 'src/types/session.type';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -12,12 +13,14 @@ export class AuthGuard implements CanActivate {
     const sid: unknown = request.cookies?.sid;
 
     if (typeof sid !== 'string') {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException("Cookie 'sid' not found");
     }
 
     const session = await this.redisService.getSession(sid);
 
-    console.log(session);
+    if (session?.userAgent !== request.headers['user-agent']) {
+      throw new UnauthorizedException('Invalid session');
+    }
 
     return true;
   }
