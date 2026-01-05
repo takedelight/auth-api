@@ -11,25 +11,6 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto, @Req() request: Request) {
-    const store = request.sessionStore;
-
-    if (!store) {
-      console.log('No session store available');
-      return 'no store';
-    }
-
-    if (store.all) {
-      store.all((err, sessions) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log('SESSIONS:', sessions);
-      });
-    } else {
-      console.log('store.all is not available');
-    }
-
     return this.authService.login(dto, request);
   }
 

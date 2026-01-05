@@ -5,21 +5,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
-import { createClient } from 'redis';
 import { RedisStore } from 'connect-redis';
+import { RedisService } from './redis/redis.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
-
-  const redisClient = createClient({
-    socket: {
-      host: 'localhost',
-      port: configService.getOrThrow<number>('REDIS_PORT'),
-    },
-  });
-
-  redisClient.connect().catch(console.error);
+  const redisService = app.get(RedisService);
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -29,9 +21,13 @@ async function bootstrap() {
     origin: configService.getOrThrow<string>('CORS_ORIGIN'),
   });
 
+  const client = redisService.getClient();
+
+  console.log(client);
+
   app.use(
     session({
-      store: new RedisStore({ client: redisClient }),
+      store: new RedisStore({ client }),
       name: configService.getOrThrow<string>('SESSION_NAME'),
       secret: configService.getOrThrow<string>('SESSION_SECRET'),
       resave: false,
@@ -48,7 +44,9 @@ async function bootstrap() {
   app.use(cookieParser());
 
   await app.listen(configService.getOrThrow<number>('PORT'), () =>
-    console.log(configService.getOrThrow<number>('PORT')),
+    console.log(
+      ` App running on port http://localhost:${configService.getOrThrow<number>('PORT')}`,
+    ),
   );
 }
 bootstrap().catch((e) => console.log(e));
