@@ -18,9 +18,8 @@ export class AuthService {
 
     request.session.userId = user.id;
     request.session.role = user.role;
-    request.session.userAgent = request.headers['user-agent'];
 
-    return { message: `User ${user.username} logged in successfully` };
+    return 1;
   }
 
   async register(dto: RegisterDto) {

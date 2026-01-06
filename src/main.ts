@@ -23,8 +23,6 @@ async function bootstrap() {
 
   const client = redisService.getClient();
 
-  console.log(client);
-
   app.use(
     session({
       store: new RedisStore({ client }),
