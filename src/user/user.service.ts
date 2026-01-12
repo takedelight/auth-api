@@ -1,21 +1,29 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entity/user.entity';
-import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
 import { hash } from 'argon2';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getAllUsers() {
-    return await this.userRepository.find({ select: { password: false } });
+    return await this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+        createdAt: true,
+      },
+    });
   }
 
   async getUserByEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -25,9 +33,15 @@ export class UserService {
   }
 
   async getUserById(id: string) {
-    const user = await this.userRepository.findOne({
+    const user = await this.prisma.user.findUnique({
       where: { id },
-      select: ['createdAt', 'email', 'id', 'role', 'username'],
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+        createdAt: true,
+      },
     });
 
     if (!user) {
@@ -38,19 +52,26 @@ export class UserService {
   }
 
   async create(dto: CreateUserDto) {
-    const isExist = await this.userRepository.findOne({ where: { email: dto.email } });
+    const isExist = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
 
     if (isExist) {
       throw new ConflictException('User with this email already exists');
     }
 
-    const newUser = this.userRepository.create({ ...dto, password: await hash(dto.password) });
+    const newUser = await this.prisma.user.create({
+      data: {
+        ...dto,
+        password: await hash(dto.password),
+      },
+    });
 
-    return await this.userRepository.save(newUser);
+    return newUser;
   }
 
   async update(id: string, dto: UpdateUserDto) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -60,17 +81,29 @@ export class UserService {
       dto.password = await hash(dto.password);
     }
 
-    await this.userRepository.update(user.id, dto);
+    return await this.prisma.user.update({
+      where: { id },
+      data: dto,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: true,
+        createdAt: true,
+      },
+    });
   }
 
   async delete(id: string) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    await this.userRepository.delete(user.id);
+    await this.prisma.user.delete({
+      where: { id },
+    });
 
     return { message: 'User deleted successfully' };
   }
