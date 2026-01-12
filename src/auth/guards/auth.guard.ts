@@ -15,8 +15,6 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException("Cookie 'sid' not found");
     }
 
-    console.log(request.session);
-
     return true;
   }
 }

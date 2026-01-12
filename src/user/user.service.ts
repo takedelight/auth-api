@@ -3,10 +3,14 @@ import { hash } from 'argon2';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly s3Service: S3Service,
+  ) {}
 
   async getAllUsers() {
     return await this.prisma.user.findMany({
@@ -106,5 +110,20 @@ export class UserService {
     });
 
     return { message: 'User deleted successfully' };
+  }
+
+  async updateAvatar(userId: string, file: Express.Multer.File) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const avatarSrc = await this.s3Service.uploadFile(file, 'avatars');
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatar: avatarSrc },
+    });
   }
 }

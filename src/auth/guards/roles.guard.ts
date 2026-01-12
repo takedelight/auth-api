@@ -18,8 +18,6 @@ export class RolesGuard implements CanActivate {
 
     const userRole = request.session.role;
 
-    console.log(userRole);
-
     if (!roles.includes(userRole!)) {
       throw new ForbiddenException('User does not have access to this resource');
     }

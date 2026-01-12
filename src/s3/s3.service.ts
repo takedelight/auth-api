@@ -12,8 +12,8 @@ export class S3Service {
       region: configService.getOrThrow<string>('S3_REGION'),
       endpoint: `https://${configService.getOrThrow<string>('SUPABASE_PROJECT_ID')}.supabase.co/storage/v1/s3`,
       credentials: {
-        accessKeyId: configService.getOrThrow<string>('S3_SECRET_KEY'),
-        secretAccessKey: configService.getOrThrow<string>('S3_ACCESS_KEY'),
+        accessKeyId: configService.getOrThrow<string>('S3_ACCESS_KEY'),
+        secretAccessKey: configService.getOrThrow<string>('S3_SECRET_KEY'),
       },
       forcePathStyle: true,
     });
