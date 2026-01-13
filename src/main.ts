@@ -5,13 +5,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
-import { RedisStore } from 'connect-redis';
-import { RedisService } from './redis/redis.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
-  const redisService = app.get(RedisService);
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -21,11 +18,10 @@ async function bootstrap() {
     origin: configService.getOrThrow<string>('CORS_ORIGIN'),
   });
 
-  const client = redisService.getClient();
+  app.use(cookieParser());
 
   app.use(
     session({
-      store: new RedisStore({ client }),
       name: configService.getOrThrow<string>('SESSION_NAME'),
       secret: configService.getOrThrow<string>('SESSION_SECRET'),
       resave: false,
@@ -34,12 +30,10 @@ async function bootstrap() {
         httpOnly: true,
         secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax',
+        sameSite: false,
       },
     }),
   );
-
-  app.use(cookieParser());
 
   await app.listen(configService.getOrThrow<number>('PORT'), () =>
     console.log(

@@ -19,13 +19,11 @@ export class AuthService {
     request.session.userId = user.id;
     request.session.role = user.role;
 
-    return 1;
+    console.log(request.session);
   }
 
   async register(dto: RegisterDto) {
-    const user = await this.userService.create(dto);
-
-    return { message: `User ${user.username} registered successfully` };
+    await this.userService.create(dto);
   }
 
   async logout(request: Request) {

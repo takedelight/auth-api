@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { RedisModule } from './redis/redis.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { S3Module } from './s3/s3.module';
 
@@ -12,7 +11,6 @@ import { S3Module } from './s3/s3.module';
 
     UserModule,
     AuthModule,
-    RedisModule,
     PrismaModule,
     S3Module,
   ],

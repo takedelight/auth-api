@@ -2,9 +2,7 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Patch,
-  Post,
   Req,
   UploadedFile,
   UseGuards,
@@ -36,9 +34,11 @@ export class UserController {
     return await this.userService.update(id!, dto);
   }
 
-  @Post(':id/avatar')
+  @Patch('avatar')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Param('id') userId: string) {
-    return await this.userService.updateAvatar(userId, file);
+  async uploadAvatar(@Req() request: Request, @UploadedFile() file: Express.Multer.File) {
+    const userId = request.session.userId;
+
+    return await this.userService.updateAvatar(userId!, file);
   }
 }

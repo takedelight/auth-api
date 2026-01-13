@@ -7,6 +7,16 @@ import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class UserService {
+  private readonly select = {
+    id: true,
+    email: true,
+    firstName: true,
+    lastName: true,
+    avatar: true,
+    role: true,
+    createdAt: true,
+  };
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly s3Service: S3Service,
@@ -14,13 +24,7 @@ export class UserService {
 
   async getAllUsers() {
     return await this.prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        role: true,
-        createdAt: true,
-      },
+      select: this.select,
     });
   }
 
@@ -39,13 +43,7 @@ export class UserService {
   async getUserById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        role: true,
-        createdAt: true,
-      },
+      select: this.select,
     });
 
     if (!user) {
@@ -88,13 +86,7 @@ export class UserService {
     return await this.prisma.user.update({
       where: { id },
       data: dto,
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        role: true,
-        createdAt: true,
-      },
+      select: this.select,
     });
   }
 

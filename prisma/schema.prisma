@@ -11,7 +11,9 @@ datasource db {
 model User {
   id String @default(uuid()) @unique
 
-  username String 
+  firstName String @map("first_name")
+
+  lastName String? @map("last_name")
 
   email String @unique
 
