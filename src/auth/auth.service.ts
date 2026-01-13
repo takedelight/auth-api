@@ -5,12 +5,14 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { type Request } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     readonly configService: ConfigService,
+    private readonly primsaService: PrismaService,
   ) {}
 
   async login(dto: LoginDto, request: Request) {
@@ -19,7 +21,12 @@ export class AuthService {
     request.session.userId = user.id;
     request.session.role = user.role;
 
-    console.log(request.session);
+    await this.primsaService.session.update({
+      where: { sid: request.sessionID },
+      data: {
+        userId: user.id,
+      },
+    });
   }
 
   async register(dto: RegisterDto) {

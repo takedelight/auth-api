@@ -5,10 +5,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import { PrismaService } from './prisma/prisma.service';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
+
+  const prismaService = app.get(PrismaService);
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -32,6 +36,11 @@ async function bootstrap() {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: false,
       },
+      store: new PrismaSessionStore(prismaService, {
+        checkPeriod: 2 * 60 * 1000,
+        dbRecordIdIsSessionId: false,
+        dbRecordIdFunction: undefined,
+      }),
     }),
   );
 

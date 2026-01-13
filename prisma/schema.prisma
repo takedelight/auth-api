@@ -6,10 +6,8 @@ datasource db {
   provider = "postgresql"
 }
 
-
-
 model User {
-  id String @default(uuid()) @unique
+  id String @unique @default(uuid())
 
   firstName String @map("first_name")
 
@@ -21,12 +19,28 @@ model User {
 
   avatar String?
 
-  role Roles  @default(USER)
+  role Roles @default(USER)
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  session Session[]
 
   @@map("user")
+}
+
+model Session {
+  id String @unique @default(uuid())
+
+  sid String @unique
+
+  data String
+
+  expiresAt DateTime @map("expires_at")
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String? @map("user_id")
+
+  @@map("sessions")
 }
 
 enum Roles {

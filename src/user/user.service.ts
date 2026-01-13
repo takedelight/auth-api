@@ -43,7 +43,21 @@ export class UserService {
   async getUserById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: this.select,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        role: true,
+        createdAt: true,
+        session: {
+          select: {
+            id: true,
+            expiresAt: true,
+          },
+        },
+      },
     });
 
     if (!user) {
