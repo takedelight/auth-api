@@ -51,10 +51,12 @@ export class UserService {
         avatar: true,
         role: true,
         createdAt: true,
-        session: {
+        sessions: {
           select: {
             id: true,
             expiresAt: true,
+            ip: true,
+            userAgent: true,
           },
         },
       },

@@ -23,7 +23,7 @@ model User {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  session Session[]
+  sessions Session[]
 
   @@map("user")
 }
@@ -37,7 +37,12 @@ model Session {
 
   expiresAt DateTime @map("expires_at")
 
+  ip String? 
+
+  userAgent String? @map("user_agent")
+
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   userId    String? @map("user_id")
 
   @@map("sessions")

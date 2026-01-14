@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { S3Module } from './s3/s3.module';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { S3Module } from './s3/s3.module';
     AuthModule,
     PrismaModule,
     S3Module,
+    SessionModule,
   ],
   controllers: [],
 })

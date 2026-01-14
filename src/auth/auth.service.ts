@@ -6,6 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { type Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UAParser } from 'ua-parser-js';
 
 @Injectable()
 export class AuthService {
@@ -14,19 +15,40 @@ export class AuthService {
     readonly configService: ConfigService,
     private readonly primsaService: PrismaService,
   ) {}
-
   async login(dto: LoginDto, request: Request) {
     const user = await this.validateUser(dto);
 
+    const parser = new UAParser(request.headers['user-agent']);
+
+    const ip =
+      request.headers['x-forwarded-for']?.toString().split(',')[0] ?? request.socket.remoteAddress;
+    const userAgent = parser.getResult().browser.name;
+
     request.session.userId = user.id;
     request.session.role = user.role;
+    request.session.ip = ip;
+    request.session.userAgent = userAgent;
+
+    await new Promise<void>((resolve, reject) => {
+      request.session.save((err) => {
+        if (err instanceof Error) {
+          return reject(err);
+        }
+
+        resolve();
+      });
+    });
 
     await this.primsaService.session.update({
       where: { sid: request.sessionID },
       data: {
         userId: user.id,
+        ip,
+        userAgent,
       },
     });
+
+    return { success: true };
   }
 
   async register(dto: RegisterDto) {
@@ -36,11 +58,14 @@ export class AuthService {
   async logout(request: Request) {
     await new Promise<void>((resolve, reject) => {
       request.session.destroy((err) => {
-        if (err instanceof Error) {
-          return reject(err);
-        }
+        if (err instanceof Error) return reject(err);
 
-        request.res?.clearCookie(this.configService.getOrThrow<string>('SESSION_NAME'));
+        request.res?.clearCookie(this.configService.getOrThrow<string>('SESSION_NAME'), {
+          path: '/',
+          httpOnly: true,
+          secure: process.env.NODE_middENV === 'production',
+          sameSite: 'lax',
+        });
 
         resolve();
       });
