@@ -149,13 +149,16 @@ export class UserService {
     }
 
     const isValid = await verify(user.password, dto.currentPassword);
-
     if (!isValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException('The provided password is incorrect');
+    }
+
+    const isSamePassword = await verify(user.password, dto.newPassword);
+    if (isSamePassword) {
+      throw new ConflictException('The new password cannot be the same as the current password');
     }
 
     const hashedPassword = await hash(dto.newPassword);
-
     await this.prisma.user.update({
       where: { id: userId },
       data: { password: hashedPassword },
