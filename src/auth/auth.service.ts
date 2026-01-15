@@ -18,15 +18,12 @@ export class AuthService {
   async login(dto: LoginDto, request: Request) {
     const user = await this.validateUser(dto);
 
-    const parser = new UAParser(request.headers['user-agent']);
+    const parser = new UAParser(dto.userAgent);
 
-    const ip =
-      request.headers['x-forwarded-for']?.toString().split(',')[0] ?? request.socket.remoteAddress;
     const userAgent = parser.getResult().browser.name;
 
     request.session.userId = user.id;
     request.session.role = user.role;
-    request.session.ip = ip;
     request.session.userAgent = userAgent;
 
     await new Promise<void>((resolve, reject) => {
@@ -43,7 +40,6 @@ export class AuthService {
       where: { sid: request.sessionID },
       data: {
         userId: user.id,
-        ip,
         userAgent,
       },
     });

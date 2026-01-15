@@ -14,6 +14,7 @@ import { type Request } from 'express';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('user')
 @UseGuards(AuthGuard, RolesGuard)
@@ -40,5 +41,12 @@ export class UserController {
     const userId = request.session.userId;
 
     return await this.userService.updateAvatar(userId!, file);
+  }
+
+  @Patch('update-password')
+  async updatePassword(@Req() request: Request, @Body() dto: UpdatePasswordDto) {
+    const id = request.session.userId;
+
+    return await this.userService.updatePassword(id!, dto);
   }
 }
