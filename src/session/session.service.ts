@@ -13,4 +13,8 @@ export class SessionService {
     }
     return { message: 'Session deleted successfully' };
   }
+
+  async getSessions(sessionId: string) {
+    return await this.prismaService.session.findUnique({ where: { sid: sessionId } });
+  }
 }

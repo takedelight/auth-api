@@ -4,9 +4,10 @@ import { AuthController } from './auth.controller';
 import { UserService } from 'src/user/user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { S3Service } from 'src/s3/s3.service';
+import { SessionService } from 'src/session/session.service';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, UserService, PrismaService, S3Service],
+  providers: [AuthService, UserService, PrismaService, S3Service, SessionService],
 })
 export class AuthModule {}

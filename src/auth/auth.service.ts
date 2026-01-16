@@ -35,6 +35,7 @@ export class AuthService {
         resolve();
       });
     });
+
     await this.primsaService.session.update({
       where: { sid: request.sessionID },
       data: {
